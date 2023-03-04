@@ -1,12 +1,13 @@
 #ifndef __SUPER_FREQ__
 #define __SUPER_FREQ__
 
+#include <stdint.h>
+
 class superFreq {
-  void update();
+  void update(bool);
   float getFreq();
   float getPulseWidth();
   uint32_t getPeriod();
-  uint32_t lastUsHigh;
   uint32_t getHighPeriod();
   uint32_t getLowPeriod();
 
