@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+template <class N>
 class superFreq {
   void update(bool);
   float getFreq();
@@ -12,8 +13,9 @@ class superFreq {
   uint32_t getLowPeriod();
 
 private:
-  uint32_t lastUsHigh = 0;
-  uint32_t lastUsLow = 0;
+  uint32_t high[N] = {0};
+  uint32_t low[N] = {0};
+  uint8_t highIndex, lowIndex;
 };
 
 #endif // __SUPER_FREQ__
