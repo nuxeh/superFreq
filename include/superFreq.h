@@ -29,9 +29,10 @@ public:
   int8_t getEdgesRaw(superFreqEdge *, uint8_t);
 
 private:
+  bool isFull = 0;
   uint32_t high[N] = {0};
   uint32_t low[N] = {0};
-  uint8_t highIndex, lowIndex;
+  uint8_t highHead, lowHead, highTail, lowTail;
 };
 
 #endif // __SUPER_FREQ__

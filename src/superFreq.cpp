@@ -4,12 +4,12 @@ template <uint8_t N>
 void superFreq<N>::update(bool state) {
   switch (state) {
     case true:
-      high[highIndex] = micros();
-      highIndex = (lowIndex + 1) % N;
+      high[highHead] = micros();
+      highHead = (lowHead + 1) % N;
       break;
     case false:
-      low[lowIndex] = micros();
-      lowIndex = (lowIndex + 1) % N;
+      low[lowHead] = micros();
+      lowHead = (lowHead + 1) % N;
       break;
   }
 }
@@ -27,7 +27,9 @@ float superFreq<N>::getPulseWidth() {
 
 template <uint8_t N>
 uint32_t superFreq<N>::getPeriod() {
+  if (highTail != highHead || isFull) {
 
+  }
 }
 
 template <uint8_t N>
