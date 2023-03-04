@@ -1,6 +1,6 @@
 #include "superFreq.h"
 
-template <uint8_t N>
+template <size_t N>
 void superFreq<N>::update(bool state) {
   switch (state) {
     case true:
@@ -15,29 +15,29 @@ void superFreq<N>::update(bool state) {
 }
 
 
-template <uint8_t N>
+template <size_t N>
 float superFreq<N>::getFreq() {
 
 }
 
-template <uint8_t N>
+template <size_t N>
 float superFreq<N>::getPulseWidth() {
 
 }
 
-template <uint8_t N>
+template <size_t N>
 uint32_t superFreq<N>::getPeriod() {
   if (highTail != highHead || isFull) {
 
   }
 }
 
-template <uint8_t N>
+template <size_t N>
 uint32_t superFreq<N>::getHighPeriod() {
 
 }
 
-template <uint8_t N>
+template <size_t N>
 uint32_t superFreq<N>::getLowPeriod() {
 
 }

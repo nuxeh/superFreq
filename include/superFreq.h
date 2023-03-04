@@ -8,7 +8,18 @@ typedef struct {
   uint32_t delta;
 } superFreqEdge;
 
-template <uint8_t N = 4>
+template <size_t N = 4, typename T = uint32_t, typename I = uint8_t>
+class superFreqRingBuffer {
+public:
+  T buffer[N] = {0};
+
+private:
+  void advance();
+  I head = 0;
+  I tail = 0;
+};
+
+template <size_t N = 4>
 class superFreq {
 public:
   void update(bool);
