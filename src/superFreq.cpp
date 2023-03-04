@@ -1,40 +1,41 @@
 #include "superFreq.h"
 
-template <class N>
+template <uint8_t N>
 void superFreq<N>::update(bool state) {
-template <class N>
   switch (state) {
     case true:
-      lastUsHigh = micros();
+      high[highIndex] = micros();
+      highIndex = (lowIndex + 1) % N;
       break;
     case false:
-      lastUsLow = micros();
+      low[lowIndex] = micros();
+      lowIndex = (lowIndex + 1) % N;
       break;
   }
 }
 
 
-template <class N>
+template <uint8_t N>
 float superFreq<N>::getFreq() {
 
 }
 
-template <class N>
+template <uint8_t N>
 float superFreq<N>::getPulseWidth() {
 
 }
 
-template <class N>
+template <uint8_t N>
 uint32_t superFreq<N>::getPeriod() {
 
 }
 
-template <class N>
+template <uint8_t N>
 uint32_t superFreq<N>::getHighPeriod() {
 
 }
 
-template <class N>
+template <uint8_t N>
 uint32_t superFreq<N>::getLowPeriod() {
 
 }
