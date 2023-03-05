@@ -112,7 +112,7 @@ superFreqEdge superFreq<N,I>::readEdge() {
 template <size_t N, typename I>
 void superFreq<N,I>::print() {
   periods.print();
-  highPeriods.print();
+  //highPeriods.print();
 }
 #endif
 
@@ -128,6 +128,7 @@ T superFreqRingBuffer<N,T,I>::getAvg() {
   if(checksum != chk) {
     avg = calcAvg();
     chk = checksum;
+    Serial.println("Recalculating...");
   }
   return avg;
 }
@@ -143,8 +144,15 @@ T superFreqRingBuffer<N,T,I>::calcAvg() {
   I count = 0;
   I start = t;
 
-  while ((start++ % N) != h) {
-    sum += buffer[(start + count++) % N];
+  while ((start % N) != h) {
+    Serial.print(count);
+    Serial.print(' ');
+    Serial.print(start);
+    Serial.print(' ');
+    sum += buffer[start % N];
+    Serial.println(start % N);
+    count++;
+    start++;
   }
 
   return ((sum << 3) / count) >> 3;
