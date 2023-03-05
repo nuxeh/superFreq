@@ -14,13 +14,13 @@ public:
   void insert(T);
   bool isFull();
   bool isEmpty();
-  T getAvg();
+  T getAvg(I n);
   T read();
   I available();
 
 private:
   T calcAvg();
-  void advance();
+  void advance(I n);
 
   T buffer[N] = {0};
   I h = 0; /* head pointer */
