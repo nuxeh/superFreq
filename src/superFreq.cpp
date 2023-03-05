@@ -2,14 +2,16 @@
 
 template <size_t N>
 void superFreq<N>::update(bool state) {
+  uint32_t m = micros();
+  uint32_t p = m - lastHigh;
+  lastHigh = m;
+
   switch (state) {
     case true:
-      high[highHead] = micros();
-      highHead = (lowHead + 1) % N;
+      highPeriods.insert(p);
       break;
     case false:
-      low[lowHead] = micros();
-      lowHead = (lowHead + 1) % N;
+      lowPeriods.insert(p);
       break;
   }
 }
@@ -27,9 +29,7 @@ float superFreq<N>::getPulseWidth() {
 
 template <size_t N>
 uint32_t superFreq<N>::getPeriod() {
-  if (highTail != highHead || isFull) {
-
-  }
+  return highPeriods.getAvg();
 }
 
 template <size_t N>
@@ -39,6 +39,6 @@ uint32_t superFreq<N>::getHighPeriod() {
 
 template <size_t N>
 uint32_t superFreq<N>::getLowPeriod() {
-
+  return lowPeriods.getAvg();
 }
 

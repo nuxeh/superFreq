@@ -8,29 +8,31 @@ typedef struct {
   uint32_t delta;
 } superFreqEdge;
 
-template <size_t N = 4, typename T = uint32_t, typename I = uint8_t>
+template <size_t N, typename T, typename I>
 class superFreqRingBuffer {
 public:
-  T buffer[N] = {0};
+  void insert(T);
+  bool isFull();
+  bool isEmpty();
+  void getAvg();
 
 private:
   void advance();
+
+  T buffer[N] = {0};
   I head = 0;
   I tail = 0;
 };
 
-template <size_t N = 4>
+template <size_t N = 5>
 class superFreq {
 public:
   void update(bool);
   float getFreq();
   float getPulseWidth();
   uint32_t getPeriod();
-  uint32_t getPeriodAvg();
   uint32_t getHighPeriod();
-  uint32_t getHighPeriodAvg();
   uint32_t getLowPeriod();
-  uint32_t getLowPeriodAvg();
   int8_t getPeriods(uint32_t *, uint8_t);
   int8_t getHighPeriods(uint32_t *, uint8_t);
   int8_t getLowPeriods(uint32_t *, uint8_t);
@@ -40,10 +42,9 @@ public:
   int8_t getEdgesRaw(superFreqEdge *, uint8_t);
 
 private:
-  bool isFull = 0;
-  uint32_t high[N] = {0};
-  uint32_t low[N] = {0};
-  uint8_t highHead, lowHead, highTail, lowTail;
+  superFreqRingBuffer<N, uint32_t, uint8_t> highPeriods;
+  superFreqRingBuffer<N, uint32_t, uint8_t> lowPeriods;
+  uint32_t lastHigh = 0;
 };
 
 #endif // __SUPER_FREQ__
