@@ -10,7 +10,7 @@ template <size_t N, typename T, typename I>
 T superFreqRingBuffer<N,T,I>::getAvg() {
   I checksum = h ^ t;
   if(checksum != chk) {
-    avg = calcAvg(n);
+    avg = calcAvg();
     chk = checksum;
   }
   return avg;
@@ -25,7 +25,7 @@ template <size_t N, typename T, typename I>
 T superFreqRingBuffer<N,T,I>::calcAvg() {
   uint32_t sum = 0;
   I count = 0;
-  I start = (I)(((int32_t)h - (int32_t)t) % (int32_t)N);
+  I start = t;
 
   while ((start++ % N) != h) {
     sum += buffer[(start + count++) % N];
@@ -41,9 +41,7 @@ T superFreqRingBuffer<N,T,I>::read() {
 
 template <size_t N, typename T, typename I>
 I superFreqRingBuffer<N,T,I>::available() {
-  int32_t delta = ((uint32_t)h - (uint32_t)t) % N;
-  return 
-
+  return (I)(((int32_t)h - (int32_t)t) % (int32_t)N);
 }
 
 template <size_t N, typename T, typename I>

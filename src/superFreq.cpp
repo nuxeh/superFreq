@@ -52,3 +52,11 @@ template <size_t N, typename I>
 superFreqEdge superFreq<N,I>::readEdge() {
 
 }
+
+#ifdef SUPER_FREQ_DEBUG
+template <size_t N, typename I>
+void superFreq<N,I>::print() {
+  periods.print();
+  highPeriods.print();
+}
+#endif

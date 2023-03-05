@@ -45,6 +45,9 @@ public:
   uint32_t getLowPeriod();
   I available();
   superFreqEdge readEdge();
+#ifdef SUPER_FREQ_DEBUG
+  void print();
+#endif
 
 private:
   superFreqRingBuffer<N, uint32_t, I> periods;     /* buffer of periods H->H */
