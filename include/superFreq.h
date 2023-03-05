@@ -189,9 +189,10 @@ void superFreqRingBuffer<N,T,I>::print() {
     if (i == h) Serial.print("H(");
     if (i == r) Serial.print("R(");
     Serial.print(buffer[i]);
-    Serial.print(' ');
     if (i == t || i == h || i == r) Serial.print(")");
+    Serial.print(' ');
   }
+  Serial.print("\r\n");
 }
 #endif
 
