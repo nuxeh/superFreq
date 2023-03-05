@@ -24,7 +24,7 @@ float superFreq<N,I>::getFreq() {
 
 template <size_t N, typename I>
 float superFreq<N,I>::getPulseWidth() {
-  return getHighPeriod() / (float)getLowPeriod();
+  return (float)getHighPeriod() / (float)getLowPeriod();
 
 }
 

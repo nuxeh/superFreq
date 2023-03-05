@@ -14,13 +14,16 @@ public:
   void insert(T);
   bool isFull();
   bool isEmpty();
-  T getAvg(I n);
+  T getAvg();
   T read();
   I available();
+#ifdef SUPER_FREQ_DEBUG
+  void print();
+#endif
 
 private:
   T calcAvg();
-  void advance(I n);
+  void advance();
 
   T buffer[N] = {0};
   I h = 0; /* head pointer */
