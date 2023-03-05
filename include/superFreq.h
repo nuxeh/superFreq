@@ -23,10 +23,9 @@ private:
   void advance();
 
   T buffer[N] = {0};
-  I head = 0;
-  I tail = 0;
-  I read = 0;
-
+  I h = 0; /* head pointer */
+  I t = 0; /* tail pointer */
+  I r = 0; /* read pointer */
   T avg = 0; /* cache for averaged value */
   I chk = 0; /* checksum at the point the cache was generated */
 };
@@ -42,11 +41,11 @@ public:
   uint32_t getHighPeriod();
   uint32_t getLowPeriod();
   I available();
-  bool readEdge();
+  superFreqEdge readEdge();
 
 private:
-  superFreqRingBuffer<N, uint32_t, I> highPeriods;
-  superFreqRingBuffer<N, uint32_t, I> lowPeriods;
+  superFreqRingBuffer<N, uint32_t, I> periods;     /* buffer of periods H->H */
+  superFreqRingBuffer<N, uint32_t, I> highPeriods; /* buffer of periods H->L */
   uint32_t lastHigh = 0;
 };
 

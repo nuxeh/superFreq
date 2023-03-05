@@ -1,23 +1,23 @@
 #include "superFreq.h"
 
 template <size_t N, typename T, typename I>
-bool superFreqRingBuffer<N,T,I>::insert(T value) {
+void superFreqRingBuffer<N,T,I>::insert(T value) {
   
 }
 
 template <size_t N, typename T, typename I>
 bool superFreqRingBuffer<N,T,I>::isFull() {
-  return (head + 1 == tail);
+  return (h + 1 == t);
 }
 
 template <size_t N, typename T, typename I>
 bool superFreqRingBuffer<N,T,I>::isEmpty() {
-
+  return (h == t);
 }
 
 template <size_t N, typename T, typename I>
 T superFreqRingBuffer<N,T,I>::getAvg() {
-  I checksum = head ^ tail;
+  I checksum = h ^ t;
   if(checksum != chk) {
     avg = calcAvg();
     chk = checksum;
@@ -31,7 +31,7 @@ T superFreqRingBuffer<N,T,I>::calcAvg() {
 }
 
 template <size_t N, typename T, typename I>
-I superFreqRingBuffer<N,T,I>::read() {
+T superFreqRingBuffer<N,T,I>::read() {
 
 }
 

@@ -1,7 +1,7 @@
 #include "superFreq.h"
 
 template <size_t N, typename I>
-void superFreq<N>::update(bool state) {
+void superFreq<N,I>::update(bool state) {
   uint32_t m = micros();
   uint32_t p = m - lastHigh;
   lastHigh = m;
@@ -17,38 +17,38 @@ void superFreq<N>::update(bool state) {
 }
 
 template <size_t N, typename I>
-float superFreq<N>::getFreq() {
+float superFreq<N,I>::getFreq() {
   return 1000000.0 / (float)getPeriod();
 
 }
 
 template <size_t N, typename I>
-float superFreq<N>::getPulseWidth() {
+float superFreq<N,I>::getPulseWidth() {
   return getHighPeriod() / (float)getLowPeriod();
 
 }
 
 template <size_t N, typename I>
-uint32_t superFreq<N>::getPeriod() {
+uint32_t superFreq<N,I>::getPeriod() {
   return periods.getAvg();
 }
 
 template <size_t N, typename I>
-uint32_t superFreq<N>::getHighPeriod() {
+uint32_t superFreq<N,I>::getHighPeriod() {
   return highPeriods.getAvg();
 }
 
 template <size_t N, typename I>
-uint32_t superFreq<N>::getLowPeriod() {
+uint32_t superFreq<N,I>::getLowPeriod() {
   return periods.getAvg() - highPeriods.getAvg();
 }
 
 template <size_t N, typename I>
-I superFreq<N>::available() {
+I superFreq<N,I>::available() {
 
 }
 
 template <size_t N, typename I>
-superFreqEdge superFreq<N>::readEdge() {
+superFreqEdge superFreq<N,I>::readEdge() {
 
 }
