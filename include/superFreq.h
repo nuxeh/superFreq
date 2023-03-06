@@ -59,11 +59,11 @@ template <size_t N, typename I>
 void superFreq<N,I>::update(bool state) {
   uint32_t m = micros();
   uint32_t p = m - lastHigh;
-  lastHigh = m;
 
   switch (state) {
     case true:
       periods.insert(p);
+      lastHigh = m;
       break;
     case false:
       highPeriods.insert(p);
@@ -79,7 +79,7 @@ float superFreq<N,I>::getFreq() {
 
 template <size_t N, typename I>
 float superFreq<N,I>::getPulseWidth() {
-  return (float)getHighPeriod() / (float)getLowPeriod();
+  return (float)getHighPeriod() / (float)getPeriod();
 
 }
 
