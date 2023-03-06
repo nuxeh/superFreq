@@ -17,7 +17,7 @@ public:
   T getAvg();
   T read();
   I available();
-#ifdef SUPER_FREQ_DEBUG
+#ifdef SUPER_FREQ_DEBUG_SERIAL
   void print();
 #endif
 
@@ -45,7 +45,7 @@ public:
   uint32_t getLowPeriod();
   I available();
   superFreqEdge readEdge();
-#ifdef SUPER_FREQ_DEBUG
+#ifdef SUPER_FREQ_DEBUG_SERIAL
   void print();
 #endif
 
@@ -108,7 +108,7 @@ superFreqEdge superFreq<N,I>::readEdge() {
 
 }
 
-#ifdef SUPER_FREQ_DEBUG
+#ifdef SUPER_FREQ_DEBUG_SERIAL
 template <size_t N, typename I>
 void superFreq<N,I>::print() {
   periods.print();
@@ -189,7 +189,7 @@ void superFreqRingBuffer<N,T,I>::advance() {
 	h = (h + 1) % N; /* advance head */
 }
 
-#ifdef SUPER_FREQ_DEBUG
+#ifdef SUPER_FREQ_DEBUG_SERIAL
 template <size_t N, typename T, typename I>
 void superFreqRingBuffer<N,T,I>::print() {
   for (I i=0; i<N; i++) {
