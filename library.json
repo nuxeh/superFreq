@@ -1,7 +1,7 @@
 {
   "name": "superFreq",
   "version": "0.1.0",
-  "description": "A simple frequency-measuring library for Arduino, without use of timers",
+  "description": "A small frequency-measuring library for Arduino, without use of timer capture compare pins",
   "keywords": "",
   "repository":
   {
