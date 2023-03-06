@@ -181,10 +181,10 @@ bool superFreqRingBuffer<N,T,I>::isEmpty() {
 template <size_t N, typename T, typename I>
 void superFreqRingBuffer<N,T,I>::advance() {
   if(isFull()) {
-		t = (t + 1) % N; /* advance tail if full */
     if (t + 1 > r) {
 		  r = (r + 1) % N; /* advance read if tail has caught up */
     }
+		t = (t + 1) % N; /* advance tail if full */
 	}
 	h = (h + 1) % N; /* advance head */
 }
