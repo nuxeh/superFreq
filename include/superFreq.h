@@ -144,7 +144,7 @@ T superFreqRingBuffer<N,T>::getAvg() {
  */
 template <size_t N, typename T>
 T superFreqRingBuffer<N,T>::calcAvg() {
-  T sum;
+  T sum = 0;
   uint8_t count = 0;
   uint8_t start = t;
 
@@ -154,13 +154,18 @@ T superFreqRingBuffer<N,T>::calcAvg() {
     Serial.print(' ');
     Serial.print(start);
     Serial.print(' ');
-    Serial.println(start % N);
+    Serial.print(start % N);
+    Serial.print(" = ");
+    Serial.println(buffer[start % N]);
 #endif
 
     sum += buffer[start % N];
     count++;
     start++;
   }
+
+  Serial.println(sum);
+  Serial.println(count);
 
   return ((sum << 3) / count) >> 3;
 }
