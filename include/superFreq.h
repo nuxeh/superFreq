@@ -126,7 +126,7 @@ T superFreqRingBuffer<N,T,I>::getAvg() {
  */
 template <size_t N, typename T, typename I>
 T superFreqRingBuffer<N,T,I>::calcAvg() {
-  uint32_t sum = 0;
+  T sum = 0;
   I count = 0;
   I start = t;
 
