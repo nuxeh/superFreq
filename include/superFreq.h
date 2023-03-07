@@ -93,12 +93,12 @@ struct superFreqCycle {
 };
 
 template <size_t N, typename T>
-class superFreqRingBuffer {
-public:
+struct superFreqRingBuffer {
   void insert(T);
   bool isFull();
   bool isEmpty();
   T getAvg();
+  void flush();
   T read();
   uint8_t available();
 #ifdef SUPER_FREQ_DEBUG_SERIAL
@@ -174,7 +174,9 @@ T superFreqRingBuffer<N,T>::read() {
 
 template <size_t N, typename T>
 uint8_t superFreqRingBuffer<N,T>::available() {
-  return (uint8_t)(((int32_t)h - (int32_t)t) % (int32_t)N);
+  return (h > t)
+         ? h - t
+         : N - t + h;
 }
 
 template <size_t N, typename T>
@@ -185,6 +187,11 @@ bool superFreqRingBuffer<N,T>::isFull() {
 template <size_t N, typename T>
 bool superFreqRingBuffer<N,T>::isEmpty() {
   return (h == t);
+}
+
+template <size_t N, typename T>
+void superFreqRingBuffer<N,T>::flush() {
+  t = h;
 }
 
 template <size_t N, typename T>
@@ -205,7 +212,7 @@ void superFreqRingBuffer<N,T>::print() {
     if (i == t) Serial.print("T(");
     if (i == h) Serial.print("H(");
     if (i == r) Serial.print("R(");
-    Serial.print(buffer[i].highUs ^ buffer[i].lowUs);
+    Serial.print(buffer[i]);
     if (i == t || i == h || i == r) Serial.print(")");
     Serial.print(' ');
   }
@@ -216,9 +223,10 @@ void superFreqRingBuffer<N,T>::print() {
 template <size_t N>
 struct superFreq {
   void update(bool);
-  bool isFull();
   uint8_t available();
   superFreqCycle getAvg();
+  int getPeriods(uint32_t *);
+  bool isFull();
 #ifdef SUPER_FREQ_DEBUG_SERIAL
   void print();
 #endif
@@ -265,6 +273,8 @@ template <size_t N>
 superFreqCycle superFreq<N>::getAvg() {
   uint32_t us = periods.getAvg();
   uint32_t highUs = highPeriods.getAvg();
+  periods.flush();
+  highPeriods.flush();
   return superFreqCycle(highUs, us - highUs);
 }
 
