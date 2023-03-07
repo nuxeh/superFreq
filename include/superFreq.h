@@ -164,8 +164,10 @@ T superFreqRingBuffer<N,T>::calcAvg() {
     start++;
   }
 
+#ifdef SUPER_FREQ_DEBUG_SERIAL
   Serial.println(sum);
   Serial.println(count);
+#endif
 
   return ((sum << 3) / count) >> 3;
 }
