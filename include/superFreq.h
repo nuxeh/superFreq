@@ -238,10 +238,15 @@ void superFreq<N>::update(bool state) {
   uint32_t p = m - lastHigh;
 
   switch (state) {
+    /* high */
     case true:
-      //cycles.insert(p);
+      superFreqCycle c;
+      c.lowUs = 0;
+      c.highUs = 0;
+      cycles.insert(c);
       lastHigh = m;
       break;
+    /* low */
     case false:
       //cycles.insert(p);
       break;
