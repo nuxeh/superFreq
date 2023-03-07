@@ -3,11 +3,6 @@
 
 #include <Arduino.h>
 
-typedef struct {
-  bool state;
-  uint32_t delta;
-} superFreqEdge;
-
 struct superFreqCycle {
   uint32_t highUs;
   uint32_t lowUs;
