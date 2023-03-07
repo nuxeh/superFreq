@@ -45,12 +45,32 @@ struct superFreqCycle {
     return *this;
   }
 
+  superFreqCycle& operator<<=(const uint32_t &rhs) {
+    highUs <<= rhs;
+    lowUs <<= rhs;
+    return *this;
+  }
+
+  superFreqCycle& operator>>=(const uint32_t &rhs) {
+    highUs >>= rhs;
+    lowUs >>= rhs;
+    return *this;
+  }
+
   const superFreqCycle operator+(const superFreqCycle &other) const {
     return superFreqCycle(*this) += other;
   }
 
   const superFreqCycle operator/(uint32_t rhs) const {
     return superFreqCycle(*this) /= rhs;
+  }
+
+  const superFreqCycle operator<<(uint32_t rhs) const {
+    return superFreqCycle(*this) <<= rhs;
+  }
+
+  const superFreqCycle operator>>(uint32_t rhs) const {
+    return superFreqCycle(*this) >>= rhs;
   }
 };
 
