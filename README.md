@@ -1,5 +1,7 @@
 ## superFreq
 
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/nuxeh/library/superFreq.svg)](https://registry.platformio.org/libraries/nuxeh/superFreq)
+
 A small Arduino library for measuring frequencies, and getting other parameters
 from a repetetive signal.
 
