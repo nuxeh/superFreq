@@ -174,7 +174,7 @@ T superFreqRingBuffer<N,T>::read() {
 
 template <size_t N, typename T>
 uint8_t superFreqRingBuffer<N,T>::available() {
-  return (h > r)
+  return (h >= r)
          ? h - r
          : N - r + h;
 }
