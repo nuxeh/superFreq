@@ -17,7 +17,7 @@
   ],
   "license": "ISC",
   "dependencies": {},
-  "frameworks": "*",
+  "frameworks": [ "arduino" ],
   "platforms": "*",
   "export": {
     "include":
