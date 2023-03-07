@@ -4,7 +4,7 @@
 //#define SUPER_FREQ_DEBUG_SERIAL
 #include "superFreq.h"
 
-superFreq<5, uint8_t> sf;
+superFreq<5> sf;
 
 volatile bool state = false;
 
@@ -20,9 +20,10 @@ void setup() {
 }
 
 void loop() {
-#ifdef SUPER_FREQ_DEBUG_SERIAL
-  sf.print();
-#endif
-  Serial.println(sf.getFreq());
-  delay(100);
+  if (sf.available() > 0) {
+    superFreqCycle a = sf.getAvg();
+    Serial.println(a.getFreq());
+    sf.flush();
+  }
+  delay(2000);
 }

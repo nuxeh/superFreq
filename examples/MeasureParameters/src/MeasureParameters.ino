@@ -21,12 +21,13 @@ void setup() {
 }
 
 void loop() {
-#ifdef SUPER_FREQ_DEBUG_SERIAL
-  sf.print();
-#endif
-  sprintf(PB, "T=%lu F=%.2f PW=%.2f TH=%lu TL=%lu",
-          sf.getPeriod(), sf.getFreq(), sf.getPulseWidth(),
-          sf.getHighPeriod(), sf.getLowPeriod());
-  Serial.println(PB);
-  delay(101);
+  if (sf.available() > 0) {
+    superFreqCycle a = sf.getAvg();
+    sprintf(PB, "T=%lu F=%.2f PW=%.2f TH=%lu TL=%lu",
+            a.getPeriod(), a.getFreq(), a.getDutyCycle(),
+            a.highUs, a.lowUs);
+    Serial.println(PB);
+    sf.flush();
+  }
+  delay(2000);
 }
