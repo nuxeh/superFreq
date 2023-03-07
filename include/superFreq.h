@@ -89,7 +89,7 @@ struct superFreqCycle {
   }
 };
 
-template <size_t N, typename T, typename I>
+template <size_t N, typename T>
 class superFreqRingBuffer {
 public:
   void insert(T);
@@ -97,7 +97,7 @@ public:
   bool isEmpty();
   T getAvg();
   T read();
-  I available();
+  uint8_t available();
 #ifdef SUPER_FREQ_DEBUG_SERIAL
   void print();
 #endif
@@ -107,23 +107,23 @@ private:
   void advance();
 
   T buffer[N] = {0};
-  I h = 0; /* head pointer */
-  I t = 0; /* tail pointer */
-  I r = 0; /* read pointer */
-  T avg = 0; /* cache for averaged value */
-  I chk = 0; /* checksum at the point the cache was generated */
+  uint8_t h = 0; /* head pointer */
+  uint8_t t = 0; /* tail pointer */
+  uint8_t r = 0; /* read pointer */
+  T avg; /* cache for averaged value */
+  uint8_t chk = 0; /* checksum at the point the cache was generated */
 };
 
 
-template <size_t N, typename T, typename I>
-void superFreqRingBuffer<N,T,I>::insert(T value) {
+template <size_t N, typename T>
+void superFreqRingBuffer<N,T>::insert(T value) {
   buffer[h] = value;
   advance();
 }
 
-template <size_t N, typename T, typename I>
-T superFreqRingBuffer<N,T,I>::getAvg() {
-  I checksum = h ^ t;
+template <size_t N, typename T>
+T superFreqRingBuffer<N,T>::getAvg() {
+  uint8_t checksum = h ^ t;
   if(checksum != chk) {
 #ifdef SUPER_FREQ_DEBUG_SERIAL
     Serial.println("Recalculating...");
@@ -139,11 +139,11 @@ T superFreqRingBuffer<N,T,I>::getAvg() {
  * start from oldest sample to avoid data changing in interrupt as much as
  * possible
  */
-template <size_t N, typename T, typename I>
-T superFreqRingBuffer<N,T,I>::calcAvg() {
-  T sum = 0;
-  I count = 0;
-  I start = t;
+template <size_t N, typename T>
+T superFreqRingBuffer<N,T>::calcAvg() {
+  T sum;
+  uint8_t count = 0;
+  uint8_t start = t;
 
   while ((start % N) != h) {
 #ifdef SUPER_FREQ_DEBUG_SERIAL
@@ -162,30 +162,30 @@ T superFreqRingBuffer<N,T,I>::calcAvg() {
   return ((sum << 3) / count) >> 3;
 }
 
-template <size_t N, typename T, typename I>
-T superFreqRingBuffer<N,T,I>::read() {
+template <size_t N, typename T>
+T superFreqRingBuffer<N,T>::read() {
   T ret = buffer[r];
   r = (r + 1) % N;
   return ret;
 }
 
-template <size_t N, typename T, typename I>
-I superFreqRingBuffer<N,T,I>::available() {
-  return (I)(((int32_t)h - (int32_t)t) % (int32_t)N);
+template <size_t N, typename T>
+uint8_t superFreqRingBuffer<N,T>::available() {
+  return (uint8_t)(((int32_t)h - (int32_t)t) % (int32_t)N);
 }
 
-template <size_t N, typename T, typename I>
-bool superFreqRingBuffer<N,T,I>::isFull() {
+template <size_t N, typename T>
+bool superFreqRingBuffer<N,T>::isFull() {
   return ((h + 1) % N == t);
 }
 
-template <size_t N, typename T, typename I>
-bool superFreqRingBuffer<N,T,I>::isEmpty() {
+template <size_t N, typename T>
+bool superFreqRingBuffer<N,T>::isEmpty() {
   return (h == t);
 }
 
-template <size_t N, typename T, typename I>
-void superFreqRingBuffer<N,T,I>::advance() {
+template <size_t N, typename T>
+void superFreqRingBuffer<N,T>::advance() {
   if(isFull()) {
     if (t + 1 > r) {
       r = (r + 1) % N; /* advance read if tail has caught up */
@@ -196,9 +196,9 @@ void superFreqRingBuffer<N,T,I>::advance() {
 }
 
 #ifdef SUPER_FREQ_DEBUG_SERIAL
-template <size_t N, typename T, typename I>
-void superFreqRingBuffer<N,T,I>::print() {
-  for (I i=0; i<N; i++) {
+template <size_t N, typename T>
+void superFreqRingBuffer<N,T>::print() {
+  for (uint8_t i=0; i<N; i++) {
     if (i == t) Serial.print("T(");
     if (i == h) Serial.print("H(");
     if (i == r) Serial.print("R(");
@@ -210,26 +210,26 @@ void superFreqRingBuffer<N,T,I>::print() {
 }
 #endif
 
-template <size_t N, typename I>
-class superFreq {
-public:
+template <size_t N>
+struct superFreq {
   void update(bool);
   bool isFull();
-  I available();
+  uint8_t available();
   superFreqCycle readCycle();
+  superFreqCycle getAvg();
 #ifdef SUPER_FREQ_DEBUG_SERIAL
   void print();
 #endif
 
 private:
-  superFreqRingBuffer<N, superFreqCycle, I> cycles;
+  superFreqRingBuffer<N, superFreqCycle> cycles;
   uint32_t lastHigh = 0;
   bool lastState = false;
   bool locked = false;
 };
 
-template <size_t N, typename I>
-void superFreq<N,I>::update(bool state) {
+template <size_t N>
+void superFreq<N>::update(bool state) {
   if (lastState == state) {
     return;
   }
@@ -251,19 +251,24 @@ void superFreq<N,I>::update(bool state) {
 }
 
 
-template <size_t N, typename I>
-I superFreq<N,I>::available() {
+template <size_t N>
+uint8_t superFreq<N>::available() {
   return cycles.available();
 }
 
-template <size_t N, typename I>
-superFreqCycle superFreq<N,I>::readCycle() {
+template <size_t N>
+superFreqCycle superFreq<N>::readCycle() {
   return cycles.read();
 }
 
+template <size_t N>
+superFreqCycle superFreq<N>::getAvg() {
+  return cycles.getAvg();
+}
+
 #ifdef SUPER_FREQ_DEBUG_SERIAL
-template <size_t N, typename I>
-void superFreq<N,I>::print() {
+template <size_t N>
+void superFreq<N>::print() {
   cycles.print();
 }
 #endif
