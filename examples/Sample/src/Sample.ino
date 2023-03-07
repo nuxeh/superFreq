@@ -6,6 +6,8 @@
 
 #include <Arduino.h>
 #include <TimerOne.h>
+
+#define SUPER_FREQ_CYCLE_DEBUG_SERIAL
 #include <superFreq.h>
 
 #define PIN 13
