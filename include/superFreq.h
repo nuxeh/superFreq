@@ -45,6 +45,7 @@ struct superFreqCycle {
   superFreqCycle& operator=(const int &rhs) {
     highUs = rhs;
     lowUs = rhs;
+    return *this;
   }
 
   superFreqCycle& operator+=(const superFreqCycle &rhs) {
@@ -163,7 +164,9 @@ T superFreqRingBuffer<N,T,I>::calcAvg() {
 
 template <size_t N, typename T, typename I>
 T superFreqRingBuffer<N,T,I>::read() {
-
+  T ret = buffer[r];
+  r = (r + 1) % N;
+  return ret;
 }
 
 template <size_t N, typename T, typename I>
@@ -199,7 +202,7 @@ void superFreqRingBuffer<N,T,I>::print() {
     if (i == t) Serial.print("T(");
     if (i == h) Serial.print("H(");
     if (i == r) Serial.print("R(");
-    Serial.print(buffer[i]);
+    Serial.print(buffer[i].highUs ^ buffer[i].lowUs);
     if (i == t || i == h || i == r) Serial.print(")");
     Serial.print(' ');
   }
@@ -236,11 +239,11 @@ void superFreq<N,I>::update(bool state) {
 
   switch (state) {
     case true:
-      cycles.insert(p);
+      //cycles.insert(p);
       lastHigh = m;
       break;
     case false:
-      cycles.insert(p);
+      //cycles.insert(p);
       break;
   }
 
@@ -255,7 +258,7 @@ I superFreq<N,I>::available() {
 
 template <size_t N, typename I>
 superFreqCycle superFreq<N,I>::readCycle() {
-
+  return cycles.read();
 }
 
 #ifdef SUPER_FREQ_DEBUG_SERIAL
