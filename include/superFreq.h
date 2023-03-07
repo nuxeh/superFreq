@@ -250,12 +250,15 @@ private:
 template <size_t N>
 void superFreq<N>::update(bool state) {
   if (lastState == state) {
-    //return;
+    return;
   }
 
   uint32_t m = micros();
   uint32_t p = m - lastHigh;
+
+#ifdef SUPER_FREQ_DEBUG_SERIAL
   Serial.println(p);
+#endif
 
   switch (state) {
     /* high */
@@ -287,11 +290,15 @@ void superFreq<N>::flush() {
 template <size_t N>
 superFreqCycle superFreq<N>::getAvg() {
   uint32_t us = periods.getAvg();
+#ifdef SUPER_FREQ_DEBUG_SERIAL
   Serial.print("us: ");
   Serial.print(us);
+#endif
   uint32_t highUs = highPeriods.getAvg();
+#ifdef SUPER_FREQ_DEBUG_SERIAL
   Serial.print(" highUs: ");
   Serial.println(highUs);
+#endif
   return superFreqCycle(highUs, us - highUs);
 }
 
