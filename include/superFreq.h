@@ -8,6 +8,52 @@ typedef struct {
   uint32_t delta;
 } superFreqEdge;
 
+struct superFreqCycle {
+  uint32_t highUs;
+  uint32_t lowUs;
+
+  float getFreq();
+  float getDutyCycle();
+
+#ifdef SUPER_FREQ_DEBUG_SERIAL
+  void print() {
+    Serial.print("superFreqCycle { .highUs: ");
+    Serial.print(highUs);
+    Serial.print(", .lowUs: ");
+    Serial.print(lowUs);
+    Serial.print(" }\r\n");
+  }
+#endif
+
+  superFreqCycle& operator=(const superFreqCycle &rhs) {
+    if (this != &rhs) {
+      highUs = rhs.highUs;
+      lowUs = rhs.lowUs;
+    }
+    return *this;
+  }
+
+  superFreqCycle& operator+=(const superFreqCycle &rhs) {
+    highUs += rhs.highUs;
+    lowUs += rhs.lowUs;
+    return *this;
+  }
+
+  superFreqCycle& operator/=(const uint32_t &rhs) {
+    highUs /= rhs;
+    lowUs /= rhs;
+    return *this;
+  }
+
+  const superFreqCycle operator+(const superFreqCycle &other) const {
+    return superFreqCycle(*this) += other;
+  }
+
+  const superFreqCycle operator/(uint32_t rhs) const {
+    return superFreqCycle(*this) /= rhs;
+  }
+};
+
 template <size_t N, typename T, typename I>
 class superFreqRingBuffer {
 public:
