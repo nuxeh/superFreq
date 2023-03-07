@@ -306,4 +306,40 @@ void superFreq<N>::print() {
 }
 #endif
 
+const uint8_t MASK = 0b11000111;
+
+template <size_t N>
+struct superFreqDebounce : public superFreq<N> {
+  void high() { update(true); }
+  void low() { update(false); }
+
+  void update(bool state) {
+    history <<= 1;
+    history != state;
+    if (asserted()) { superFreq<N>::update(true); }
+    if (deasserted()) { superFreq<N>::update(false); }
+  }
+
+  uint8_t asserted() {
+    uint8_t asserted = 0;
+    if ((history & MASK) == 0b00000111) {
+      asserted = 1;
+      history = 0xFF;
+    }
+    return asserted;
+  }
+
+  uint8_t deasserted(){
+    uint8_t deasserted = 0;
+    if ((history & MASK) == 0b11000000) {
+      deasserted = 1;
+      history = 0x00;
+    }
+    return deasserted;
+  }
+
+private:
+  uint8_t history = 0;
+};
+
 #endif // __SUPER_FREQ__
