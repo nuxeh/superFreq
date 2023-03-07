@@ -11,6 +11,7 @@ typedef struct {
 template <size_t N, typename T, typename I>
 class superFreqRingBuffer {
 public:
+  superFreqRingBuffer() {};
   void insert(T);
   bool isFull();
   bool isEmpty();
@@ -36,6 +37,7 @@ private:
 template <size_t N, typename I>
 class superFreq {
 public:
+  superFreq() {};
   void update(bool);
   bool isFull();
   float getFreq();
@@ -44,6 +46,7 @@ public:
   uint32_t getHighPeriod();
   uint32_t getLowPeriod();
   I available();
+  bool haveLock();
   superFreqEdge readEdge();
 #ifdef SUPER_FREQ_DEBUG_SERIAL
   void print();
@@ -53,10 +56,16 @@ private:
   superFreqRingBuffer<N, uint32_t, I> periods;     /* buffer of periods H->H */
   superFreqRingBuffer<N, uint32_t, I> highPeriods; /* buffer of periods H->L */
   uint32_t lastHigh = 0;
+  bool lastState = false;
+  bool locked = false;
 };
 
 template <size_t N, typename I>
 void superFreq<N,I>::update(bool state) {
+  if (lastState == state) {
+    return;
+  }
+
   uint32_t m = micros();
   uint32_t p = m - lastHigh;
 
@@ -69,6 +78,8 @@ void superFreq<N,I>::update(bool state) {
       highPeriods.insert(p);
       break;
   }
+
+  lastState = state;
 }
 
 template <size_t N, typename I>
@@ -100,7 +111,12 @@ uint32_t superFreq<N,I>::getLowPeriod() {
 
 template <size_t N, typename I>
 I superFreq<N,I>::available() {
+  return periods.available();
+}
 
+template <size_t N, typename I>
+bool superFreq<N,I>::haveLock() {
+  return locked;
 }
 
 template <size_t N, typename I>
