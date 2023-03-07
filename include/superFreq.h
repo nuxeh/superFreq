@@ -315,7 +315,7 @@ struct superFreqDebounce : public superFreq<N> {
 
   void update(bool state) {
     history <<= 1;
-    history != state;
+    history |= state;
     if (asserted()) { superFreq<N>::update(true); }
     if (deasserted()) { superFreq<N>::update(false); }
   }
