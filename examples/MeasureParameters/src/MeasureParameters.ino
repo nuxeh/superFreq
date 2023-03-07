@@ -4,7 +4,7 @@
 //#define SUPER_FREQ_DEBUG_SERIAL
 #include "superFreq.h"
 
-superFreq<5, uint8_t> sf;
+superFreq<5> sf;
 
 volatile bool state = false;
 char PB[78] = {0};
