@@ -4,7 +4,7 @@
 //#define SUPER_FREQ_DEBUG_SERIAL
 #include "superFreq.h"
 
-superFreq<5> sf();
+superFreq<5> sf;
 
 volatile bool state = false;
 
