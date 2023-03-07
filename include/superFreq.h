@@ -243,11 +243,12 @@ private:
 template <size_t N>
 void superFreq<N>::update(bool state) {
   if (lastState == state) {
-    return;
+    //return;
   }
 
   uint32_t m = micros();
   uint32_t p = m - lastHigh;
+  Serial.println(p);
 
   switch (state) {
     /* high */
