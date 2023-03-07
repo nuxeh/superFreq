@@ -229,6 +229,8 @@ void superFreqRingBuffer<N,T>::print() {
 
 template <size_t N>
 struct superFreq {
+  void high() { update(true); }
+  void low() { update(false); }
   void update(bool);
   uint8_t available();
   void flush();
