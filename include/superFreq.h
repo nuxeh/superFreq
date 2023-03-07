@@ -12,6 +12,9 @@ struct superFreqCycle {
   uint32_t highUs;
   uint32_t lowUs;
 
+  superFreqCycle() : highUs(0), lowUs(0) {}
+  superFreqCycle(uint32_t highUs, uint32_t lowUs) : highUs(highUs), lowUs(lowUs) {}
+
   float getFreq() {
     return 1000000.0 / (float)getPeriod();
   }
@@ -215,14 +218,14 @@ struct superFreq {
   void update(bool);
   bool isFull();
   uint8_t available();
-  superFreqCycle readCycle();
   superFreqCycle getAvg();
 #ifdef SUPER_FREQ_DEBUG_SERIAL
   void print();
 #endif
 
 private:
-  superFreqRingBuffer<N, superFreqCycle> cycles;
+  superFreqRingBuffer<N, uint32_t> periods;     /* buffer of periods H->H */
+  superFreqRingBuffer<N, uint32_t> highPeriods; /* buffer of periods H->L */
   uint32_t lastHigh = 0;
   bool lastState = false;
   bool locked = false;
@@ -240,15 +243,12 @@ void superFreq<N>::update(bool state) {
   switch (state) {
     /* high */
     case true:
-      superFreqCycle c;
-      c.lowUs = 0;
-      c.highUs = 0;
-      cycles.insert(c);
+      periods.insert(p);
       lastHigh = m;
       break;
     /* low */
     case false:
-      //cycles.insert(p);
+      highPeriods.insert(p);
       break;
   }
 
@@ -258,23 +258,20 @@ void superFreq<N>::update(bool state) {
 
 template <size_t N>
 uint8_t superFreq<N>::available() {
-  return cycles.available();
-}
-
-template <size_t N>
-superFreqCycle superFreq<N>::readCycle() {
-  return cycles.read();
+  return periods.available();
 }
 
 template <size_t N>
 superFreqCycle superFreq<N>::getAvg() {
-  return cycles.getAvg();
+  uint32_t us = periods.getAvg();
+  uint32_t highUs = highPeriods.getAvg();
+  return superFreqCycle(highUs, us - highUs);
 }
 
 #ifdef SUPER_FREQ_DEBUG_SERIAL
 template <size_t N>
 void superFreq<N>::print() {
-  cycles.print();
+  periods.print();
 }
 #endif
 
