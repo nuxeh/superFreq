@@ -11,7 +11,6 @@ typedef struct {
 template <size_t N, typename T, typename I>
 class superFreqRingBuffer {
 public:
-  superFreqRingBuffer() {};
   void insert(T);
   bool isFull();
   bool isEmpty();
@@ -34,103 +33,6 @@ private:
   I chk = 0; /* checksum at the point the cache was generated */
 };
 
-template <size_t N, typename I>
-class superFreq {
-public:
-  superFreq() {};
-  void update(bool);
-  bool isFull();
-  float getFreq();
-  float getPulseWidth();
-  uint32_t getPeriod();
-  uint32_t getHighPeriod();
-  uint32_t getLowPeriod();
-  I available();
-  bool haveLock();
-  superFreqEdge readEdge();
-#ifdef SUPER_FREQ_DEBUG_SERIAL
-  void print();
-#endif
-
-private:
-  superFreqRingBuffer<N, uint32_t, I> periods;     /* buffer of periods H->H */
-  superFreqRingBuffer<N, uint32_t, I> highPeriods; /* buffer of periods H->L */
-  uint32_t lastHigh = 0;
-  bool lastState = false;
-  bool locked = false;
-};
-
-template <size_t N, typename I>
-void superFreq<N,I>::update(bool state) {
-  if (lastState == state) {
-    return;
-  }
-
-  uint32_t m = micros();
-  uint32_t p = m - lastHigh;
-
-  switch (state) {
-    case true:
-      periods.insert(p);
-      lastHigh = m;
-      break;
-    case false:
-      highPeriods.insert(p);
-      break;
-  }
-
-  lastState = state;
-}
-
-template <size_t N, typename I>
-float superFreq<N,I>::getFreq() {
-  return 1000000.0 / (float)getPeriod();
-
-}
-
-template <size_t N, typename I>
-float superFreq<N,I>::getPulseWidth() {
-  return (float)getHighPeriod() / (float)getPeriod();
-
-}
-
-template <size_t N, typename I>
-uint32_t superFreq<N,I>::getPeriod() {
-  return periods.getAvg();
-}
-
-template <size_t N, typename I>
-uint32_t superFreq<N,I>::getHighPeriod() {
-  return highPeriods.getAvg();
-}
-
-template <size_t N, typename I>
-uint32_t superFreq<N,I>::getLowPeriod() {
-  return periods.getAvg() - highPeriods.getAvg();
-}
-
-template <size_t N, typename I>
-I superFreq<N,I>::available() {
-  return periods.available();
-}
-
-template <size_t N, typename I>
-bool superFreq<N,I>::haveLock() {
-  return locked;
-}
-
-template <size_t N, typename I>
-superFreqEdge superFreq<N,I>::readEdge() {
-
-}
-
-#ifdef SUPER_FREQ_DEBUG_SERIAL
-template <size_t N, typename I>
-void superFreq<N,I>::print() {
-  periods.print();
-  //highPeriods.print();
-}
-#endif
 
 template <size_t N, typename T, typename I>
 void superFreqRingBuffer<N,T,I>::insert(T value) {
@@ -222,6 +124,103 @@ void superFreqRingBuffer<N,T,I>::print() {
     Serial.print(' ');
   }
   Serial.print("\r\n");
+}
+#endif
+
+template <size_t N, typename I>
+class superFreq {
+public:
+  void update(bool);
+  bool isFull();
+  float getFreq();
+  float getPulseWidth();
+  uint32_t getPeriod();
+  uint32_t getHighPeriod();
+  uint32_t getLowPeriod();
+  I available();
+  bool haveLock();
+  superFreqEdge readEdge();
+#ifdef SUPER_FREQ_DEBUG_SERIAL
+  void print();
+#endif
+
+private:
+  superFreqRingBuffer<N, uint32_t, I> periods;     /* buffer of periods H->H */
+  superFreqRingBuffer<N, uint32_t, I> highPeriods; /* buffer of periods H->L */
+  uint32_t lastHigh = 0;
+  bool lastState = false;
+  bool locked = false;
+};
+
+template <size_t N, typename I>
+void superFreq<N,I>::update(bool state) {
+  if (lastState == state) {
+    return;
+  }
+
+  uint32_t m = micros();
+  uint32_t p = m - lastHigh;
+
+  switch (state) {
+    case true:
+      periods.insert(p);
+      lastHigh = m;
+      break;
+    case false:
+      highPeriods.insert(p);
+      break;
+  }
+
+  lastState = state;
+}
+
+template <size_t N, typename I>
+float superFreq<N,I>::getFreq() {
+  return 1000000.0 / (float)getPeriod();
+
+}
+
+template <size_t N, typename I>
+float superFreq<N,I>::getPulseWidth() {
+  return (float)getHighPeriod() / (float)getPeriod();
+
+}
+
+template <size_t N, typename I>
+uint32_t superFreq<N,I>::getPeriod() {
+  return periods.getAvg();
+}
+
+template <size_t N, typename I>
+uint32_t superFreq<N,I>::getHighPeriod() {
+  return highPeriods.getAvg();
+}
+
+template <size_t N, typename I>
+uint32_t superFreq<N,I>::getLowPeriod() {
+  return periods.getAvg() - highPeriods.getAvg();
+}
+
+template <size_t N, typename I>
+I superFreq<N,I>::available() {
+  return periods.available();
+}
+
+template <size_t N, typename I>
+bool superFreq<N,I>::haveLock() {
+  return locked;
+}
+
+template <size_t N, typename I>
+superFreqEdge superFreq<N,I>::readEdge() {
+
+}
+
+#ifdef SUPER_FREQ_DEBUG_SERIAL
+template <size_t N, typename I>
+void superFreq<N,I>::print() {
+  periods.print();
+  //highPeriods.print();
 }
 #endif
 
