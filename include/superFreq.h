@@ -191,7 +191,7 @@ bool superFreqRingBuffer<N,T>::isEmpty() {
 
 template <size_t N, typename T>
 void superFreqRingBuffer<N,T>::flush() {
-  t = h;
+  r = h;
 }
 
 template <size_t N, typename T>
