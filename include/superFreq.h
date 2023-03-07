@@ -27,13 +27,13 @@ struct superFreqCycle {
     return (float)highUs / (float)getPeriod();
   }
 
-#ifdef SUPER_FREQ_DEBUG_SERIAL
+#ifdef SUPER_FREQ_CYCLE_DEBUG_SERIAL
   void print() {
     Serial.print("superFreqCycle { .highUs: ");
     Serial.print(highUs);
     Serial.print(", .lowUs: ");
     Serial.print(lowUs);
-    Serial.print(" }\r\n");
+    Serial.print(" }");
   }
 #endif
 
@@ -224,6 +224,7 @@ template <size_t N>
 struct superFreq {
   void update(bool);
   uint8_t available();
+  void flush();
   superFreqCycle getAvg();
   int getPeriods(uint32_t *);
   bool isFull();
@@ -270,11 +271,19 @@ uint8_t superFreq<N>::available() {
 }
 
 template <size_t N>
-superFreqCycle superFreq<N>::getAvg() {
-  uint32_t us = periods.getAvg();
-  uint32_t highUs = highPeriods.getAvg();
+void superFreq<N>::flush() {
   periods.flush();
   highPeriods.flush();
+}
+
+template <size_t N>
+superFreqCycle superFreq<N>::getAvg() {
+  uint32_t us = periods.getAvg();
+  Serial.print("us: ");
+  Serial.print(us);
+  uint32_t highUs = highPeriods.getAvg();
+  Serial.print(" highUs: ");
+  Serial.println(highUs);
   return superFreqCycle(highUs, us - highUs);
 }
 
