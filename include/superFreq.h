@@ -344,6 +344,20 @@ private:
   uint8_t history = 0;
 };
 
+typedef enum {
+  Start = 0,
+  Stop,
+  Asserted,
+  Deasserted,
+} superFreqCallback;
+
+struct superFreqDebounceCallback : public superFreqDebounce {
+  void attachCallback(superFreqCallback c, void (*fn)(void));
+private:
+  void (*assertedFn)();
+  void (*deassertedFn)();
+};
+
 template <typename T>
 struct superFreqMonitor {
   superFreqMonitor(uint32_t ms) : timeout(ms) {}
@@ -355,24 +369,39 @@ struct superFreqMonitor {
   void low() { sf.low(); }
   void update(bool s) { sf.update(s); }
 
+  /* perform maintenance */
   void tick() {
     uint32_t t = millis();
-    if (t - lastUpdate > timeout) {
+
+    if (t - lastProcess > timeout) {
       process();
-      lastUpdate = t;
+      lastProcess = t;
+    }
+
+    /* timeout for early loss of signal detection
+     * - bit shift >> 10 is /1024
+     * - bit shift >> 9 is /512
+     * - in other words, (us/1024)*2
+     * - i.e. 2x approx period in ms
+     */
+    uint32_t avgPeriodMs2 = avg.getPeriod() >> 9;
+
+    /* approximately two periods have elapsed without edges */
+    if (state && (t - lastUpdate > avgPeriodMs2)) {
+      state = false;
     }
   }
 
   void process() {
-    lastState = running;
     if (sf.available() > 0) {
       /* we have edges */
       avg = sf.getAvg();
       sf.flush();
-      running = true;
+      state = true;
+      lastUpdate = t;
     } else {
       /* we haven't got any edges within the timeout */
-      running = false;
+      state = false;
     }
   }
 
@@ -381,17 +410,12 @@ private:
   superFreqCycle avg;
   uint32_t timeout;
   bool running = false;
-  bool lastState = false;
-  uint32_t lastUpdate = 0;
+  uint32_t lastProcess = 0; /* time of last check for new edges */
+  uint32_t lastUpdate = 0;  /* time last new edges received */
 };
 
-typedef enum {
-  Start = 0,
-  Stop,
-} superFreqCallback;
-
 template <typename T>
-struct superFreqMonitorCallback : public superFreqMonitor {
+struct superFreqMonitorCallback : public superFreqMonitor<T> {
   void attachCallback(superFreqCallback c, void (*fn)()) {
     switch (c) {
       case superFreqCallback::Start:
@@ -406,8 +430,10 @@ struct superFreqMonitorCallback : public superFreqMonitor {
   void attachStateChangeCallback(void (*fn)(bool)) {
     stateChangeFn = fn;
   }
+    lastState = state;
 
 private:
+  bool lastState = false;
   void (*startFn)();
   void (*stopFn)();
   void (*stateChangeFn)(bool);
