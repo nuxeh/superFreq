@@ -344,4 +344,37 @@ private:
   uint8_t history = 0;
 };
 
+template <typename T>
+struct superFreqMonitor {
+  superFreqMonitor(uint32_t ms) : timeout(ms) {}
+  void setTimeoutMs(uint32_t ms) { timeout = ms; }
+  superFreqCycle getAvg() { return avg; }
+  bool isRunning() { return running; }
+  void high() { sf.high(); }
+  void low() { sf.low(); }
+  void update(bool s) { sf.update(s); }
+
+  void tick() {
+    uint32_t t = millis();
+    if (t - lastUpdate > timeout) {
+      if (sf.available() > 0) {
+        avg = sf.getAvg();
+        sf.flush();
+        running = true;
+      } else {
+        running = false;
+      }
+      lastUpdate = t;
+    }
+  }
+
+private:
+  T sf;
+  bool running;
+  superFreqCycle avg;
+  uint32_t timeout;
+  uint32_t lastUpdate = 0;
+};
+
+
 #endif // __SUPER_FREQ__
