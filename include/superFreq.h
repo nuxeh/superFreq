@@ -90,7 +90,7 @@ struct superFreqCycle {
 
 template <size_t N, typename T>
 struct superFreqRingBuffer {
-  static_assert((N && (N & (N - 1)) == 0), "ring buffer template parameter N must be a power of two!");
+  static_assert((N && (N & (N - 1)) == 0), "template parameter N must be a power of two!");
   void insert(T);
   bool isFull();
   bool isEmpty();
@@ -230,9 +230,9 @@ struct superFreq {
   void low() { update(false); }
   void update(bool);
   uint8_t available();
-  void flush();
   superFreqCycle getAvg();
-  int getPeriods(uint32_t *);
+  void flush();
+  int getPeriods(int n, uint32_t *);
   bool isFull();
 #ifdef SUPER_FREQ_DEBUG_SERIAL
   void print();
