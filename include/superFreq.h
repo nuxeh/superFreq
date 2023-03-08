@@ -230,7 +230,7 @@ struct superFreq {
   void low() { update(false); }
   void update(bool);
   uint8_t available();
-  superFreqCycle getAvg();
+  superFreqCycle getAvg(); // TODO: rename
   void flush();
   int getPeriods(int n, uint32_t *);
   bool isFull();
