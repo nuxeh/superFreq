@@ -2,7 +2,7 @@
 #include <TimerOne.h>
 
 //#define SUPER_FREQ_DEBUG_SERIAL
-#include "superFreq.h"
+#include <superFreq.h>
 
 superFreq<4> sf;
 
