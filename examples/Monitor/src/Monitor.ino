@@ -19,14 +19,13 @@ void setup() {
 }
 
 void loop() {
-  sf.tick();
-  if (sf.available() > 0) {
-    superFreqCycle a = sf.getAvg();
+  if (sf.isRunning()) {
+    superFreqCycle a = sf.getAvgCycle();
     sprintf(PB, "T=%lu F=%.2f PW=%.2f TH=%lu TL=%lu",
             a.getPeriod(), a.getFreq(), a.getDutyCycle(),
             a.highUs, a.lowUs);
     Serial.println(PB);
-    sf.flush();
   }
   delay(2000);
+  sf.tick();
 }

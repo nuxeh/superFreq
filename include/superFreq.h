@@ -347,9 +347,10 @@ private:
 template <typename T>
 struct superFreqMonitor {
   superFreqMonitor(uint32_t ms) : timeout(ms) {}
+
   void setTimeoutMs(uint32_t ms) { timeout = ms; }
-  superFreqCycle getAvg() { return avg; }
   bool isRunning() { return running; }
+  superFreqCycle getAvgCycle() { return avg; }
   void high() { sf.high(); }
   void low() { sf.low(); }
   void update(bool s) { sf.update(s); }
@@ -357,24 +358,59 @@ struct superFreqMonitor {
   void tick() {
     uint32_t t = millis();
     if (t - lastUpdate > timeout) {
-      if (sf.available() > 0) {
-        avg = sf.getAvg();
-        sf.flush();
-        running = true;
-      } else {
-        running = false;
-      }
+      process();
       lastUpdate = t;
+    }
+  }
+
+  void process() {
+    lastState = running;
+    if (sf.available() > 0) {
+      /* we have edges */
+      avg = sf.getAvg();
+      sf.flush();
+      running = true;
+    } else {
+      /* we haven't got any edges within the timeout */
+      running = false;
     }
   }
 
 private:
   T sf;
-  bool running;
   superFreqCycle avg;
   uint32_t timeout;
+  bool running = false;
+  bool lastState = false;
   uint32_t lastUpdate = 0;
 };
 
+typedef enum {
+  Start = 0,
+  Stop,
+} superFreqCallback;
+
+template <typename T>
+struct superFreqMonitorCallback : public superFreqMonitor {
+  void attachCallback(superFreqCallback c, void (*fn)()) {
+    switch (c) {
+      case superFreqCallback::Start:
+        startFn = fn;
+        break;
+      case superFreqCallback::Stop:
+        stopFn = fn;
+        break;
+    }
+  }
+
+  void attachStateChangeCallback(void (*fn)(bool)) {
+    stateChangeFn = fn;
+  }
+
+private:
+  void (*startFn)();
+  void (*stopFn)();
+  void (*stateChangeFn)(bool);
+};
 
 #endif // __SUPER_FREQ__
