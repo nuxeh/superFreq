@@ -351,33 +351,56 @@ typedef enum {
   Deasserted,
 } superFreqCallback;
 
-struct superFreqDebounceCallback : public superFreqDebounce {
-  void attachCallback(superFreqCallback c, void (*fn)(void));
+template <size_t N>
+struct superFreqDebounceCallback : public superFreqDebounce<N> {
+  void high() { update(true); }
+  void low() { update(false); }
+
+  void attachCallback(superFreqCallback c, void (*fn)(void)) {
+    switch (c) {
+      case superFreqCallback::Asserted:
+        assertedFn = fn;
+        break;
+      case superFreqCallback::Deasserted:
+        deassertedFn = fn;
+        break;
+      default:
+        break;
+    }
+  }
+
+  void update(bool state) {
+    history <<= 1;
+    history |= state;
+    if (superFreqDebounce<N>::asserted()) {
+      superFreq<N>::update(true);
+      if (assertedFn != NULL) {
+        assertedFn();
+      }
+    }
+    if (superFreqDebounce<N>::deasserted()) {
+      superFreq<N>::update(false);
+      if (deassertedFn != NULL) {
+        deassertedFn();
+      }
+    }
+  }
+
 private:
-  void (*assertedFn)();
-  void (*deassertedFn)();
+  void (*assertedFn)() = NULL;
+  void (*deassertedFn)() = NULL;
 };
 
 template <typename T>
 struct superFreqMonitor {
-  superFreqMonitor(uint32_t ms) : timeout(ms) {}
+  superFreqMonitor(T& sf) : sf(sf) {}
 
-  void setTimeoutMs(uint32_t ms) { timeout = ms; }
-  bool isRunning() { return running; }
+  bool isRunning() { return state; }
   superFreqCycle getAvgCycle() { return avg; }
-  void high() { sf.high(); }
-  void low() { sf.low(); }
-  void update(bool s) { sf.update(s); }
 
   /* perform maintenance */
   void tick() {
     uint32_t t = millis();
-
-    if (t - lastProcess > timeout) {
-      process();
-      lastProcess = t;
-    }
-
     /* timeout for early loss of signal detection
      * - bit shift >> 10 is /1024
      * - bit shift >> 9 is /512
@@ -386,36 +409,29 @@ struct superFreqMonitor {
      */
     uint32_t avgPeriodMs2 = avg.getPeriod() >> 9;
 
-    /* approximately two periods have elapsed without edges */
-    if (state && (t - lastUpdate > avgPeriodMs2)) {
-      state = false;
-    }
-  }
-
-  void process() {
     if (sf.available() > 0) {
       /* we have edges */
       avg = sf.getAvg();
       sf.flush();
       state = true;
       lastUpdate = t;
-    } else {
-      /* we haven't got any edges within the timeout */
+    } else if (state && (t - lastUpdate > avgPeriodMs2)) {
+      /* approximately two periods have elapsed without edges */
       state = false;
     }
   }
 
 private:
-  T sf;
-  superFreqCycle avg;
-  uint32_t timeout;
-  bool running = false;
-  uint32_t lastProcess = 0; /* time of last check for new edges */
-  uint32_t lastUpdate = 0;  /* time last new edges received */
+  T& sf; /* superFreq object */
+  superFreqCycle avg; /* cached average cycle */
+  bool state = false; /* running state */
+  uint32_t lastUpdate = 0; /* time last new edges received */
 };
 
 template <typename T>
 struct superFreqMonitorCallback : public superFreqMonitor<T> {
+  superFreqMonitorCallback(T& sf) : sf(sf) {}
+
   void attachCallback(superFreqCallback c, void (*fn)()) {
     switch (c) {
       case superFreqCallback::Start:
@@ -430,13 +446,37 @@ struct superFreqMonitorCallback : public superFreqMonitor<T> {
   void attachStateChangeCallback(void (*fn)(bool)) {
     stateChangeFn = fn;
   }
-    lastState = state;
+
+  void tick() {
+    bool lastState = state;
+    superFreqMonitor<N>::tick();
+
+    /* call callbacks when state has changed */
+    if (state != lastState) {
+      if (stateChangeFn != NULL) {
+        stateChangeFn(state);
+      }
+      switch (state) {
+        case true:
+          if (startFn != NULL) {
+            startFn();
+          }
+          break;
+        case false:
+          if (stopFn != NULL) {
+            stopFn();
+          }
+          break;
+      }
+    }
+  }
 
 private:
-  bool lastState = false;
-  void (*startFn)();
-  void (*stopFn)();
-  void (*stateChangeFn)(bool);
+  void (*startFn)() = NULL;
+  void (*stopFn)() = NULL;
+  void (*stateChangeFn)(bool) = NULL;
 };
+
+//TODO: edge-cacheing class
 
 #endif // __SUPER_FREQ__
