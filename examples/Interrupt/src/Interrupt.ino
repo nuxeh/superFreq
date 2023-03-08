@@ -9,7 +9,7 @@
 
 #define PIN 13
 
-superFreq<5> sf;
+superFreq<4> sf;
 
 char PB[78] = {0};
 

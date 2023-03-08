@@ -87,8 +87,10 @@ struct superFreqCycle {
   }
 };
 
+
 template <size_t N, typename T>
 struct superFreqRingBuffer {
+  static_assert((N && (N & (N - 1)) == 0), "ring buffer template parameter N must be a power of two!");
   void insert(T);
   bool isFull();
   bool isEmpty();

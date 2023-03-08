@@ -10,7 +10,7 @@
 #include <superFreq.h>
 
 #define PIN 13
-superFreqDebounce<5> sf;
+superFreqDebounce<4> sf;
 
 char PB[78] = {0};
 

@@ -13,7 +13,7 @@
 #define PIN 13
 #define MASK 0b11000111
 
-superFreq<5> sf;
+superFreq<4> sf;
 
 char PB[78] = {0};
 
