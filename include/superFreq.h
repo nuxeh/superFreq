@@ -464,6 +464,8 @@ struct superFreqMonitorCallback : public superFreqMonitor<T> {
       case superFreqCallback::Stopped:
         stopFn = fn;
         break;
+      default:
+        break;
     }
   }
 
