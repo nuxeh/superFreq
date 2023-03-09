@@ -406,15 +406,19 @@ struct superFreqMonitor {
   void tick() {
     uint32_t t = micros();
     uint32_t avgPeriod = avg.getPeriod();
+    Serial.print("avgPeriod: ");
+    Serial.println(avgPeriod);
 
     if (sf.available() > 0) {
       /* we have edges */
       avg = sf.getAvg();
+      avg.print();
+      Serial.println();
       process();
       state = true;
       lastUpdate = t;
     } else if (state && ((t - lastUpdate) >> 2) > avgPeriod) {
-      /* two periods have elapsed without edges */
+      /* four periods have elapsed without edges */
       state = false;
     }
   }
