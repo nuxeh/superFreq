@@ -350,8 +350,8 @@ private:
 };
 
 typedef enum {
-  Start = 0,
-  Stop,
+  Started = 0,
+  Stopped,
   Asserted,
   Deasserted,
 } superFreqCallback;
@@ -405,7 +405,7 @@ struct superFreqMonitor {
   /* perform maintenance */
   void tick() {
     uint32_t t = micros();
-    uint32_t avgPeriod2 = avg.getPeriod() << 1;
+    uint32_t avgPeriod = avg.getPeriod();
 
     if (sf.available() > 0) {
       /* we have edges */
@@ -413,7 +413,7 @@ struct superFreqMonitor {
       process();
       state = true;
       lastUpdate = t;
-    } else if (state && (t - lastUpdate > avgPeriod2)) {
+    } else if (state && ((t - lastUpdate) >> 2) > avgPeriod) {
       /* two periods have elapsed without edges */
       state = false;
     }
@@ -454,14 +454,14 @@ private:
 
 template <typename T>
 struct superFreqMonitorCallback : public superFreqMonitor<T> {
-  superFreqMonitorCallback(T& sf) : superFreqMonitor<T>::sf(sf) {}
+  superFreqMonitorCallback(T& sf) : superFreqMonitor<T>(sf) {}
 
   void attachCallback(superFreqCallback c, void (*fn)()) {
     switch (c) {
-      case superFreqCallback::Start:
+      case superFreqCallback::Started:
         startFn = fn;
         break;
-      case superFreqCallback::Stop:
+      case superFreqCallback::Stopped:
         stopFn = fn;
         break;
     }
