@@ -356,6 +356,8 @@ private:
   uint8_t history = 0;
 };
 
+// samples per period
+
 typedef enum {
   Started = 0,
   Stopped,
