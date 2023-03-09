@@ -33,6 +33,13 @@ struct superFreqCycle {
 #endif
 
   superFreqCycle& operator=(const superFreqCycle &rhs) {
+#if 0
+    Serial.println("assignment called");
+    print();
+    Serial.println();
+    rhs.print();
+    Serial.println();
+#endif
     if (this != &rhs) {
       highUs = rhs.highUs;
       lowUs = rhs.lowUs;
@@ -98,7 +105,7 @@ struct superFreqRingBuffer {
   void flush();
   T read();
   uint8_t available();
-#ifdef SUPER_FREQ_DEBUG_SERIAL
+#ifdef SUPER_FREQ_RB_DEBUG_SERIAL
   void print();
 #endif
 
@@ -209,7 +216,7 @@ void superFreqRingBuffer<N,T>::advance() {
   h = (h + 1) % N; /* advance head */
 }
 
-#ifdef SUPER_FREQ_DEBUG_SERIAL
+#ifdef SUPER_FREQ_RB_DEBUG_SERIAL
 template <size_t N, typename T>
 void superFreqRingBuffer<N,T>::print() {
   for (uint8_t i=0; i<N; i++) {
@@ -405,19 +412,18 @@ struct superFreqMonitor {
   /* perform maintenance */
   void tick() {
     uint32_t t = micros();
-    uint32_t avgPeriod = avg.getPeriod();
-    Serial.print("avgPeriod: ");
-    Serial.println(avgPeriod);
+    //Serial.print("period: ");
+    //Serial.println(period);
 
     if (sf.available() > 0) {
       /* we have edges */
       avg = sf.getAvg();
-      avg.print();
-      Serial.println();
+      sf.print();
+      period = avg.getPeriod();
       process();
       state = true;
       lastUpdate = t;
-    } else if (state && ((t - lastUpdate) >> 2) > avgPeriod) {
+    } else if (state && ((t - lastUpdate) >> 2) > period) {
       /* four periods have elapsed without edges */
       state = false;
     }
@@ -433,11 +439,14 @@ private:
   }
 
   superFreqCycle avg; /* cached average cycle */
+  uint32_t period = 0;
   uint32_t lastUpdate = 0; /* time last new edges received */
 };
 
 template <typename T, size_t N>
 struct superFreqMonitorCycleCache : public superFreqMonitor<T> {
+  superFreqMonitorCycleCache(T& sf) { superFreqMonitor<T>::sf = sf; }
+
   void process() {
     while (superFreqMonitor<T>::sf.available()) {
       buffer.insert(superFreqMonitor<T>::sf.read);
