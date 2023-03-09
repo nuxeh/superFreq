@@ -397,10 +397,14 @@ struct superFreqDebounceCallback : public superFreqDebounce<N> {
     }
   }
 
+// callbackls here
+
 private:
   void (*assertedFn)() = NULL;
   void (*deassertedFn)() = NULL;
 };
+
+// caching only ..? if even -- cache at source?
 
 template <typename T>
 struct superFreqMonitor {
@@ -428,6 +432,8 @@ struct superFreqMonitor {
       state = false;
     }
   }
+
+  // use debounce-like stop determination based on n samples
 
 protected:
   T& sf; /* superFreq object */
@@ -464,6 +470,8 @@ struct superFreqMonitorCycleCache : public superFreqMonitor<T> {
 private:
   superFreqRingBuffer<N, superFreqCallback> buffer;
 };
+
+// no template \/
 
 template <typename T>
 struct superFreqMonitorCallback : public superFreqMonitor<T> {
