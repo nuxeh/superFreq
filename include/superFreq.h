@@ -404,34 +404,52 @@ struct superFreqMonitor {
 
   /* perform maintenance */
   void tick() {
-    uint32_t t = millis();
-    /* timeout for early loss of signal detection
-     * - bit shift >> 10 is /1024
-     * - bit shift >> 9 is /512
-     * - in other words, (us/1024)*2
-     * - i.e. 2x approx period in ms
-     */
-    uint32_t avgPeriodMs2 = avg.getPeriod() >> 9;
+    uint32_t t = micros();
+    uint32_t avgPeriod2 = avg.getPeriod() << 1;
 
     if (sf.available() > 0) {
       /* we have edges */
       avg = sf.getAvg();
-      sf.flush();
+      process();
       state = true;
       lastUpdate = t;
-    } else if (state && (t - lastUpdate > avgPeriodMs2)) {
-      /* approximately two periods have elapsed without edges */
+    } else if (state && (t - lastUpdate > avgPeriod2)) {
+      /* two periods have elapsed without edges */
       state = false;
     }
   }
 
 protected:
   T& sf; /* superFreq object */
+  bool state = false; /* running state */
 
 private:
+  void process() {
+    sf.flush();
+  }
+
   superFreqCycle avg; /* cached average cycle */
-  bool state = false; /* running state */
   uint32_t lastUpdate = 0; /* time last new edges received */
+};
+
+template <typename T, size_t N>
+struct superFreqMonitorCycleCache : public superFreqMonitor<T> {
+  void process() {
+    while (superFreqMonitor<T>::sf.available()) {
+      buffer.insert(superFreqMonitor<T>::sf.read);
+    }
+  }
+
+  uint8_t available() {
+    return buffer.available();
+  }
+
+  superFreqCycle read() {
+    return buffer.read();
+  }
+
+private:
+  superFreqRingBuffer<N, superFreqCallback> buffer;
 };
 
 template <typename T>
