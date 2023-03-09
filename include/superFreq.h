@@ -316,8 +316,7 @@ struct superFreqDebounce : public superFreq<N> {
   void low() { update(false); }
 
   void update(bool state) {
-    history <<= 1;
-    history |= state;
+    advance(state);
     if (asserted()) { superFreq<N>::update(true); }
     if (deasserted()) { superFreq<N>::update(false); }
   }
@@ -338,6 +337,12 @@ struct superFreqDebounce : public superFreq<N> {
       history = 0x00;
     }
     return deasserted;
+  }
+
+protected:
+  void advance(bool state) {
+    history <<= 1;
+    history |= state;
   }
 
 private:
@@ -370,8 +375,7 @@ struct superFreqDebounceCallback : public superFreqDebounce<N> {
   }
 
   void update(bool state) {
-    history <<= 1;
-    history |= state;
+    superFreqDebounce<N>::advance(state);
     if (superFreqDebounce<N>::asserted()) {
       superFreq<N>::update(true);
       if (assertedFn != NULL) {
@@ -421,8 +425,10 @@ struct superFreqMonitor {
     }
   }
 
-private:
+protected:
   T& sf; /* superFreq object */
+
+private:
   superFreqCycle avg; /* cached average cycle */
   bool state = false; /* running state */
   uint32_t lastUpdate = 0; /* time last new edges received */
@@ -430,7 +436,7 @@ private:
 
 template <typename T>
 struct superFreqMonitorCallback : public superFreqMonitor<T> {
-  superFreqMonitorCallback(T& sf) : sf(sf) {}
+  superFreqMonitorCallback(T& sf) : superFreqMonitor<T>::sf(sf) {}
 
   void attachCallback(superFreqCallback c, void (*fn)()) {
     switch (c) {
@@ -448,15 +454,16 @@ struct superFreqMonitorCallback : public superFreqMonitor<T> {
   }
 
   void tick() {
-    bool lastState = state;
-    superFreqMonitor<N>::tick();
+    bool lastState = superFreqMonitor<T>::state;
+    superFreqMonitor<T>::tick();
+    bool newState = superFreqMonitor<T>::state;
 
     /* call callbacks when state has changed */
-    if (state != lastState) {
+    if (newState != lastState) {
       if (stateChangeFn != NULL) {
-        stateChangeFn(state);
+        stateChangeFn(newState);
       }
-      switch (state) {
+      switch (newState) {
         case true:
           if (startFn != NULL) {
             startFn();
