@@ -255,7 +255,7 @@ struct superFreq {
         case true:
           periods.insert(p);
           lastHigh = m;
-          samplesPerPeriod = numSamples;
+          timeoutSamples = numSamples << SPP_SHIFT;
           numSamples = 0;
           running = true;
           break;
@@ -266,7 +266,7 @@ struct superFreq {
       }
       lastState = state;
     }
-    if (numSamples > samplesPerPeriod << SPP_SHIFT) {
+    if (numSamples > timeoutSamples) {
       running = false;
     }
   }
@@ -297,11 +297,11 @@ struct superFreq {
 private:
   superFreqRingBuffer<N, uint32_t> periods;     /* buffer of periods H->H */
   superFreqRingBuffer<N, uint32_t> highPeriods; /* buffer of periods H->L */
-  uint32_t lastHigh = 0; /* us elapsed since last high */
-  bool lastState = false; /* signal state on last processed sample */
-  uint16_t numSamples = 0; /* sample counter */
-  uint16_t samplesPerPeriod = 0; /* the number of samples counted within a period */
-  bool running = false; /* true if the signal is present */
+  uint32_t lastHigh = 0;       /* us elapsed since last high */
+  bool lastState = false;      /* signal state on last processed sample */
+  uint16_t numSamples = 0;     /* sample counter */
+  uint16_t timeoutSamples = 0; /* sample count to time out at */
+  bool running = false;        /* true indicates signal presence has been detected */
 };
 
 const uint8_t MASK = 0b11000111;
