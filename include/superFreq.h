@@ -235,85 +235,70 @@ template <size_t N>
 struct superFreq {
   void high() { update(true); }
   void low() { update(false); }
-  void update(bool);
-  uint8_t available();
-  superFreqCycle getAvg(); // TODO: rename
-  void flush();
+  bool isRunning() { return running; }
   int getPeriods(int n, uint32_t *);
   bool isFull();
 #ifdef SUPER_FREQ_DEBUG_SERIAL
   void print();
 #endif
 
+  void update(bool state) {
+    if (lastState == state) {
+      return;
+    }
+    uint32_t m = micros();
+    uint32_t p = m - lastHigh;
+
+#ifdef SUPER_FREQ_DEBUG_SERIAL
+    Serial.println(p);
+#endif
+
+    switch (state) {
+      /* high */
+      case true:
+        periods.insert(p);
+        lastHigh = m;
+        break;
+      /* low */
+      case false:
+        highPeriods.insert(p);
+        break;
+    }
+
+    lastState = state;
+  }
+
+
+  uint8_t available() {
+    // highPeriods... TODO
+    return periods.available();
+  }
+
+  void flush() {
+    periods.flush();
+    highPeriods.flush();
+  }
+
+  superFreqCycle getAvg() { // Rename to getAvgCycle() TODO
+    uint32_t us = periods.getAvg();
+    uint32_t highUs = highPeriods.getAvg();
+    return superFreqCycle(highUs, us - highUs);
+  }
+
+#ifdef SUPER_FREQ_DEBUG_SERIAL
+  void print() {
+    periods.print();
+  }
+#endif
+
 private:
   superFreqRingBuffer<N, uint32_t> periods;     /* buffer of periods H->H */
   superFreqRingBuffer<N, uint32_t> highPeriods; /* buffer of periods H->L */
-  uint32_t lastHigh = 0;
-  bool lastState = false;
-  bool locked = false;
+  uint16_t numSamples = 0; /* the number of samples counted within a period */
+  uint32_t lastHigh = 0; /* us elapsed since last high */
+  bool lastState = false; /* signal state on last processed sample */
+  bool running = false; /* true if the signal is present */
 };
-
-template <size_t N>
-void superFreq<N>::update(bool state) {
-  if (lastState == state) {
-    return;
-  }
-
-  uint32_t m = micros();
-  uint32_t p = m - lastHigh;
-
-#ifdef SUPER_FREQ_DEBUG_SERIAL
-  Serial.println(p);
-#endif
-
-  switch (state) {
-    /* high */
-    case true:
-      periods.insert(p);
-      lastHigh = m;
-      break;
-    /* low */
-    case false:
-      highPeriods.insert(p);
-      break;
-  }
-
-  lastState = state;
-}
-
-
-template <size_t N>
-uint8_t superFreq<N>::available() {
-  return periods.available();
-}
-
-template <size_t N>
-void superFreq<N>::flush() {
-  periods.flush();
-  highPeriods.flush();
-}
-
-template <size_t N>
-superFreqCycle superFreq<N>::getAvg() {
-  uint32_t us = periods.getAvg();
-#ifdef SUPER_FREQ_DEBUG_SERIAL
-  Serial.print("us: ");
-  Serial.print(us);
-#endif
-  uint32_t highUs = highPeriods.getAvg();
-#ifdef SUPER_FREQ_DEBUG_SERIAL
-  Serial.print(" highUs: ");
-  Serial.println(highUs);
-#endif
-  return superFreqCycle(highUs, us - highUs);
-}
-
-#ifdef SUPER_FREQ_DEBUG_SERIAL
-template <size_t N>
-void superFreq<N>::print() {
-  periods.print();
-}
-#endif
 
 const uint8_t MASK = 0b11000111;
 
@@ -399,82 +384,16 @@ struct superFreqDebounceCallback : public superFreqDebounce<N> {
     }
   }
 
-// callbackls here
-
 private:
   void (*assertedFn)() = NULL;
   void (*deassertedFn)() = NULL;
 };
 
+// callbackls here
 // caching only ..? if even -- cache at source?
+// use debounce-like stop determination based on n samples
 
-template <typename T>
-struct superFreqMonitor {
-  superFreqMonitor(T& sf) : sf(sf) {}
-
-  bool isRunning() { return state; }
-  superFreqCycle getAvgCycle() { return avg; }
-
-  /* perform maintenance */
-  void tick() {
-    uint32_t t = micros();
-    //Serial.print("period: ");
-    //Serial.println(period);
-
-    if (sf.available() > 0) {
-      /* we have edges */
-      avg = sf.getAvg();
-      sf.print();
-      period = avg.getPeriod();
-      process();
-      state = true;
-      lastUpdate = t;
-    } else if (state && ((t - lastUpdate) >> 2) > period) {
-      /* four periods have elapsed without edges */
-      state = false;
-    }
-  }
-
-  // use debounce-like stop determination based on n samples
-
-protected:
-  T& sf; /* superFreq object */
-  bool state = false; /* running state */
-
-private:
-  void process() {
-    sf.flush();
-  }
-
-  superFreqCycle avg; /* cached average cycle */
-  uint32_t period = 0;
-  uint32_t lastUpdate = 0; /* time last new edges received */
-};
-
-template <typename T, size_t N>
-struct superFreqMonitorCycleCache : public superFreqMonitor<T> {
-  superFreqMonitorCycleCache(T& sf) { superFreqMonitor<T>::sf = sf; }
-
-  void process() {
-    while (superFreqMonitor<T>::sf.available()) {
-      buffer.insert(superFreqMonitor<T>::sf.read);
-    }
-  }
-
-  uint8_t available() {
-    return buffer.available();
-  }
-
-  superFreqCycle read() {
-    return buffer.read();
-  }
-
-private:
-  superFreqRingBuffer<N, superFreqCallback> buffer;
-};
-
-// no template \/
-
+#if 0
 template <typename T>
 struct superFreqMonitorCallback : public superFreqMonitor<T> {
   superFreqMonitorCallback(T& sf) : superFreqMonitor<T>(sf) {}
@@ -526,7 +445,6 @@ private:
   void (*stopFn)() = NULL;
   void (*stateChangeFn)(bool) = NULL;
 };
-
-//TODO: edge-cacheing class
+#endif
 
 #endif // __SUPER_FREQ__
