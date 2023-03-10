@@ -245,14 +245,18 @@ struct superFreq {
 #endif
 
   void update(bool state) {
-    numSamples++;
-    if (lastState == state) {
+    /* state has changed since last sample */
+    if (lastState != state) {
+      lastState = state;
+      Serial.print("num samples=");
+      Serial.println(numSamples);
       uint32_t m = micros();
       uint32_t p = m - lastHigh;
 
       switch (state) {
         /* high */
         case true:
+          Serial.println("HIGH");
           periods.insert(p);
           lastHigh = m;
           timeoutSamples = numSamples << SPP_SHIFT;
@@ -261,14 +265,15 @@ struct superFreq {
           break;
         /* low */
         case false:
+          Serial.println("LOW");
           highPeriods.insert(p);
           break;
       }
-      lastState = state;
     }
     if (numSamples > timeoutSamples) {
       running = false;
     }
+    numSamples++;
   }
 
 
