@@ -32,7 +32,7 @@ template <size_t N, typename T>
 void superFreqRingBuffer<N,T>::insert(T value) {
   buffer[h] = value;
   advance();
-#ifdef SUPER_FREQ_DEBUG_SERIAL
+#ifdef SUPER_FREQ_RB_DEBUG_SERIAL
   print();
 #endif
 }
@@ -41,7 +41,7 @@ template <size_t N, typename T>
 T superFreqRingBuffer<N,T>::getAvg() {
   uint8_t checksum = h ^ t;
   if(checksum != chk) {
-#ifdef SUPER_FREQ_DEBUG_SERIAL
+#ifdef SUPER_FREQ_RB_DEBUG_SERIAL
     Serial.println("Recalculating...");
 #endif
     avg = calcAvg();
@@ -62,7 +62,7 @@ T superFreqRingBuffer<N,T>::calcAvg() {
   uint8_t start = t;
 
   while ((start % N) != h) {
-#ifdef SUPER_FREQ_DEBUG_SERIAL
+#ifdef SUPER_FREQ_RB_DEBUG_SERIAL
     Serial.print(count);
     Serial.print(' ');
     Serial.print(start);
@@ -77,7 +77,7 @@ T superFreqRingBuffer<N,T>::calcAvg() {
     start++;
   }
 
-#ifdef SUPER_FREQ_DEBUG_SERIAL
+#ifdef SUPER_FREQ_RB_DEBUG_SERIAL
   Serial.println(sum);
   Serial.println(count);
 #endif
