@@ -1,7 +1,7 @@
 /*
  * trigger user defined callbacks when the superFreq debounce has determined a
  * rising or falling edge, or a start/stop event indicating detected presence
- * of the signal
+ * of the signal. Here the input signal is debounced and mirrored to an output.
  */
 
 #include <Arduino.h>
@@ -9,6 +9,7 @@
 #include <superFreq.h>
 
 #define PIN 13
+#define OUT_PIN 6
 
 superFreqDebounceCallback<4> sf;
 superFreqCallbackHandler sch;
@@ -18,8 +19,8 @@ char PB[78] = {0};
 void readInput() { sf.update(digitalRead(PIN)); }
 void started() { Serial.println(">>>> started <<<<"); }
 void stopped() { Serial.println(">>>> stopped <<<<"); }
-void asserted() { Serial.println(">> asserted <<"); }
-void deasserted() { Serial.println(">> deasserted <<"); }
+void asserted() { digitalWrite(OUT_PIN, HIGH); }
+void deasserted() { digitalWrite(OUT_PIN, LOW); }
 
 void setup() {
   Serial.begin(115200);
@@ -32,6 +33,7 @@ void setup() {
   sf.attachCallbackHandler(&sch);
 
   pinMode(PIN, INPUT);
+  pinMode(PIN_OUT, INPUT);
 
   Timer1.initialize(5000);
   Timer1.attachInterrupt(readInput);
@@ -48,4 +50,3 @@ void loop() {
   }
   delay(2000);
 }
-
