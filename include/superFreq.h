@@ -7,7 +7,7 @@
 #include "cycle.h"
 #include "ringbuf.h"
 
-#define SPP_SHIFT 2
+#define SPP_SHIFT 1
 
 template <size_t N>
 struct superFreq : public superFreqCallback {
@@ -20,28 +20,23 @@ struct superFreq : public superFreqCallback {
   void update(bool state) {
     /* state has changed since last sample */
     if (lastState != state) {
-      Serial.print("num samples=");
-      Serial.println(numSamples);
+      //Serial.print("num samples=");
+      //Serial.println(numSamples);
       uint32_t m = micros();
       uint32_t p = m - lastHigh;
 
       switch (state) {
         /* high */
         case true:
-          Serial.print("HIGH T=");
-          Serial.println(p);
           periods.insert(p);
           lastHigh = m;
           timeoutSamples = numSamples << SPP_SHIFT;
-          Serial.print("TIMEOUT SAMPLES=");
-          Serial.println(timeoutSamples);
-          numSamples = 0;
           if (!running) runCallback(CallbackEvent::Started);
           running = true;
+          numSamples = 0;
           break;
         /* low */
         case false:
-          Serial.println("LOW");
           highPeriods.insert(p);
           break;
       }
@@ -78,7 +73,8 @@ struct superFreq : public superFreqCallback {
 
 protected:
   void registerSample() {
-    if (numSamples++ > timeoutSamples) {
+    numSamples++;
+    if (running && numSamples > timeoutSamples) {
       running = false;
       runCallback(CallbackEvent::Stopped);
     }
