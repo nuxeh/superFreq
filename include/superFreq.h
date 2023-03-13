@@ -322,6 +322,7 @@ struct superFreqDebounce : public superFreq<N> {
     if (deasserted()) { superFreq<N>::update(false); }
   }
 
+protected:
   uint8_t asserted() {
     uint8_t asserted = 0;
     if ((history & MASK) == 0b00000111) {
@@ -340,7 +341,6 @@ struct superFreqDebounce : public superFreq<N> {
     return deasserted;
   }
 
-protected:
   void advance(bool state) {
     history <<= 1;
     history |= state;
