@@ -1,7 +1,7 @@
 /*
  * trigger user defined callbacks when the superFreq debounce has determined a
  * rising or falling edge, or a start/stop event indicating detected presence
- * of the signal
+ * of the signal. This sketch uses built-in debouncing provided by superFreq.
  */
 
 #include <Arduino.h>
@@ -10,7 +10,7 @@
 
 #define PIN 13
 
-superFreqDebounceCallback<4> sf;
+superFreqDebounce<4> sf;
 superFreqCallbackHandler sch;
 
 char PB[78] = {0};

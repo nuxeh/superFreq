@@ -1,3 +1,5 @@
+/* Measure the frequency of a toggling signal driven by a timer */
+
 #include <Arduino.h>
 #include <TimerOne.h>
 

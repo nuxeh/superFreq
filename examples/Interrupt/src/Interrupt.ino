@@ -1,7 +1,7 @@
 /*
  * Update superFreq with pin change interrupts. Instant response, but
  * susceptible to noise and switch bounce. This doesn't allow for signal
- * presence detection.
+ * presence detection, which requires regular sampling.
  */
 
 #include <Arduino.h>
@@ -27,11 +27,11 @@ void setup() {
 void loop() {
   if (sf.available() > 0) {
     superFreqCycle a = sf.getAvg();
-    sf.flush();
     sprintf(PB, "T=%lu F=%.2f PW=%.2f TH=%lu TL=%lu",
             a.getPeriod(), a.getFreq(), a.getDutyCycle(),
             a.highUs, a.lowUs);
     Serial.println(PB);
+    sf.flush();
   }
   delay(2000);
 }

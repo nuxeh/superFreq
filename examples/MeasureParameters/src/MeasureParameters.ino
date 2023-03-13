@@ -23,9 +23,9 @@ void setup() {
 void loop() {
   if (sf.available() > 0) {
     superFreqCycle a = sf.getAvg();
-    sprintf(PB, "T=%lu F=%.2f PW=%.2f TH=%lu TL=%lu",
+    sprintf(PB, "T=%lu F=%.2f PW=%.2f TH=%lu TL=%lu R=%d",
             a.getPeriod(), a.getFreq(), a.getDutyCycle(),
-            a.highUs, a.lowUs);
+            a.highUs, a.lowUs, sf.isRunning());
     Serial.println(PB);
     sf.flush();
   }

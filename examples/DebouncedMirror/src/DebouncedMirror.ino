@@ -11,7 +11,7 @@
 #define PIN 13
 #define OUT_PIN 6
 
-superFreqDebounceCallback<4> sf;
+superFreqDebounce<4> sf;
 superFreqCallbackHandler sch;
 
 char PB[78] = {0};
