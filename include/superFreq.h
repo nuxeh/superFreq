@@ -211,7 +211,7 @@ void superFreqRingBuffer<N,T>::flush() {
 template <size_t N, typename T>
 void superFreqRingBuffer<N,T>::advance() {
   if(isFull()) {
-    if (t + 1 > r) {
+    if ((t + 1) % N == r) {
       r = (r + 1) % N; /* advance read if tail has caught up */
     }
     t = (t + 1) % N; /* advance tail if full */
