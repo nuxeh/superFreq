@@ -9,7 +9,7 @@
 #include <superFreq.h>
 
 #define PIN 13
-#define OUT_PIN 6
+#define PIN_OUT 6
 
 superFreqDebounce<4> sf;
 superFreqCallbackHandler sch;
@@ -19,8 +19,8 @@ char PB[78] = {0};
 void readInput() { sf.update(digitalRead(PIN)); }
 void started() { Serial.println(">>>> started <<<<"); }
 void stopped() { Serial.println(">>>> stopped <<<<"); }
-void asserted() { digitalWrite(OUT_PIN, HIGH); }
-void deasserted() { digitalWrite(OUT_PIN, LOW); }
+void asserted() { digitalWrite(PIN_OUT, HIGH); }
+void deasserted() { digitalWrite(PIN_OUT, LOW); }
 
 void setup() {
   Serial.begin(115200);
@@ -33,7 +33,7 @@ void setup() {
   sf.attachCallbackHandler(&sch);
 
   pinMode(PIN, INPUT);
-  pinMode(PIN_OUT, INPUT);
+  pinMode(PIN_OUT, OUTPUT);
 
   Timer1.initialize(5000);
   Timer1.attachInterrupt(readInput);
