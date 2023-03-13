@@ -273,7 +273,7 @@ struct superFreq {
     if (numSamples > timeoutSamples) {
       running = false;
     }
-    numSamples++;
+    registerSample();
     lastState = state;
   }
 
@@ -303,6 +303,9 @@ struct superFreq {
   }
 #endif
 
+protected:
+  void registerSample() { numSamples++; }
+
 private:
   superFreqRingBuffer<N, uint32_t> periods;     /* buffer of periods H->H */
   superFreqRingBuffer<N, uint32_t> highPeriods; /* buffer of periods H->L */
@@ -323,7 +326,8 @@ struct superFreqDebounce : public superFreq<N> {
   void update(bool state) {
     advance(state);
     if (asserted()) { superFreq<N>::update(true); }
-    if (deasserted()) { superFreq<N>::update(false); }
+    else if (deasserted()) { superFreq<N>::update(false); }
+    else { superFreq<N>::registerSample(); }
   }
 
 protected:
@@ -389,12 +393,13 @@ struct superFreqDebounceCallback : public superFreqDebounce<N> {
         assertedFn();
       }
     }
-    if (superFreqDebounce<N>::deasserted()) {
+    else if (superFreqDebounce<N>::deasserted()) {
       superFreq<N>::update(false);
       if (deassertedFn != NULL) {
         deassertedFn();
       }
     }
+    else { superFreq<N>registerSample(); }
   }
 
 private:
