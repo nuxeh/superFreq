@@ -1,6 +1,6 @@
 {
   "name": "superFreq",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "A small Arduino library for measuring frequencies, and getting other parameters, from a repetetive signal",
   "keywords": "",
   "repository":
