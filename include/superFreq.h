@@ -125,10 +125,10 @@ private:
 template <size_t N, typename T>
 void superFreqRingBuffer<N,T>::insert(T value) {
   buffer[h] = value;
+  advance();
 #ifdef SUPER_FREQ_DEBUG_SERIAL
   print();
 #endif
-  advance();
 }
 
 template <size_t N, typename T>
