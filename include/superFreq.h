@@ -34,6 +34,7 @@ struct superFreq : public superFreqCallback {
           lastHigh = m;
           timeoutSamples = numSamples << SPP_SHIFT;
           numSamples = 0;
+          runCallback(CallbackEvent::Started);
           running = true;
           break;
         /* low */
@@ -45,6 +46,7 @@ struct superFreq : public superFreqCallback {
     }
     if (numSamples > timeoutSamples) {
       running = false;
+      runCallback(CallbackEvent::Stopped);
     }
     registerSample();
     lastState = state;
@@ -106,6 +108,7 @@ struct superFreqDebounce : public superFreq<N> {
       superFreq<N>::update(false);
       superFreq<N>::runCallback(CallbackEvent::Deasserted);
     }
+    /* we must still count each sample for presence detection */
     else { superFreq<N>::registerSample(); }
   }
 
