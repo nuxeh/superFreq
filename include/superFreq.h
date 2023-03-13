@@ -125,6 +125,9 @@ private:
 template <size_t N, typename T>
 void superFreqRingBuffer<N,T>::insert(T value) {
   buffer[h] = value;
+#ifdef SUPER_FREQ_DEBUG_SERIAL
+  print();
+#endif
   advance();
 }
 
@@ -227,7 +230,7 @@ void superFreqRingBuffer<N,T>::print() {
     if (i == t || i == h || i == r) Serial.print(")");
     Serial.print(' ');
   }
-  Serial.print("\r\n");
+  //Serial.print("\r\n");
 }
 #endif
 
@@ -240,9 +243,6 @@ struct superFreq {
   bool isRunning() { return running; }
   int getPeriods(int n, uint32_t *);
   bool isFull();
-#ifdef SUPER_FREQ_DEBUG_SERIAL
-  void print();
-#endif
 
   void update(bool state) {
     /* state has changed since last sample */
@@ -296,6 +296,9 @@ struct superFreq {
 #ifdef SUPER_FREQ_DEBUG_SERIAL
   void print() {
     periods.print();
+    Serial.print(" | ");
+    highPeriods.print();
+    Serial.print("\r\n");
   }
 #endif
 
