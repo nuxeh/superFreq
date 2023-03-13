@@ -33,8 +33,10 @@ struct superFreq : public superFreqCallback {
           periods.insert(p);
           lastHigh = m;
           timeoutSamples = numSamples << SPP_SHIFT;
+          Serial.print("TIMEOUT SAMPLES=");
+          Serial.println(timeoutSamples);
           numSamples = 0;
-          runCallback(CallbackEvent::Started);
+          if (!running) runCallback(CallbackEvent::Started);
           running = true;
           break;
         /* low */
@@ -43,10 +45,6 @@ struct superFreq : public superFreqCallback {
           highPeriods.insert(p);
           break;
       }
-    }
-    if (numSamples > timeoutSamples) {
-      running = false;
-      runCallback(CallbackEvent::Stopped);
     }
     registerSample();
     lastState = state;
@@ -79,7 +77,12 @@ struct superFreq : public superFreqCallback {
 #endif
 
 protected:
-  void registerSample() { numSamples++; }
+  void registerSample() {
+    if (numSamples++ > timeoutSamples) {
+      running = false;
+      runCallback(CallbackEvent::Stopped);
+    }
+  }
 
 private:
   superFreqRingBuffer<N, uint32_t> periods;     /* buffer of periods H->H */
