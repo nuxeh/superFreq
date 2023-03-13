@@ -14,15 +14,13 @@ superFreqDebounce<4> sf;
 
 char PB[78] = {0};
 
-void update(){
-  sf.update(digitalRead(PIN));
-}
+void readInput(){ sf.update(digitalRead(PIN)); }
 
 void setup() {
   Serial.begin(115200);
   pinMode(PIN, INPUT);
   Timer1.initialize(5000);
-  Timer1.attachInterrupt(update);
+  Timer1.attachInterrupt(readInput);
 }
 
 void loop() {

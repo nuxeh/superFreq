@@ -1,6 +1,7 @@
 /*
  * Update superFreq with pin change interrupts. Instant response, but
- * susceptible to noise and switch bounce.
+ * susceptible to noise and switch bounce. This doesn't allow for signal
+ * presence detection.
  */
 
 #include <Arduino.h>

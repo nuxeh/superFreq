@@ -54,9 +54,9 @@ void loop() {
     superFreqCycle a = sf.getAvg();
     a.print();
     Serial.println();
-    sprintf(PB, "T=%lu F=%.2f PW=%.2f TH=%lu TL=%lu",
+    sprintf(PB, "T=%lu F=%.2f PW=%.2f TH=%lu TL=%lu R=%d",
             a.getPeriod(), a.getFreq(), a.getDutyCycle(),
-            a.highUs, a.lowUs);
+            a.highUs, a.lowUs, sf.isRunning());
     Serial.println(PB);
     sf.flush();
   }
